@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
-import { Button, Grid, Row, Col, Navbar } from 'react-bootstrap';
+import { Row, Col, Navbar } from 'react-bootstrap';
 
 class App extends Component {
 
