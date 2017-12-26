@@ -7,13 +7,26 @@ class ImageCanvas extends Component {
   }
 
   componentDidUpdate() {
+    this.clearCanvas();
     this.drawImage();
     this.drawDots();
+  }
+
+  shouldComponentUpdate(nextProps) {
+    const imageUrlChanged = nextProps.imageUrl !== this.props.imageUrl;
+    const dotIndexChanged = nextProps.dotIndex !== this.props.dotIndex;
+    return imageUrlChanged || dotIndexChanged;
   }
 
   handleImageLoaded() {
     this.drawImage();
     this.drawDots();
+  }
+
+  clearCanvas() {
+    const canvas = this.refs.canvas;
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
   drawCanvas() {
@@ -34,8 +47,8 @@ class ImageCanvas extends Component {
     canvas.width = canvas.offsetWidth;
     canvas.height = this.calculateCanvasHeight(canvas.offsetWidth, image.width, image.height);
     const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    this.props.setCanvasDimensions(canvas.width, canvas.height);
   }
 
   drawDots() {

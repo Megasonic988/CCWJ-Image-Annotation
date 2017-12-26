@@ -10,7 +10,7 @@ var config = {
     authDomain: "ccwj-image-annotation.firebaseapp.com",
     databaseURL: "https://ccwj-image-annotation.firebaseio.com",
     projectId: "ccwj-image-annotation",
-    storageBucket: "",
+    storageBucket: "gs://ccwj-image-annotation.appspot.com",
     messagingSenderId: "445077046053"
 };
 firebase.initializeApp(config);
