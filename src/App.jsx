@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import './App.css';
-import { Row, Col, Navbar } from 'react-bootstrap';
-import ImageCanvas from './ImageCanvas';
-import Annotator from './Annotator';
+import { Dimmer, Loader } from 'semantic-ui-react';
 import * as firebase from 'firebase';
+
+import Annotator from './components/Annotator';
+import NavBar from './components/NavBar';
+import Welcome from './components/Welcome';
+import Uploader from './components/Uploader';
 
 class App extends Component {
 
@@ -16,8 +19,26 @@ class App extends Component {
       canvas: {
         width: null,
         height: null
-      }
+      },
+      user: null,
+      authLoaded: false
     };
+    this.auth = firebase.auth();
+    this.auth.onAuthStateChanged(this.onAuthStateChanged.bind(this));
+  }
+
+  onAuthStateChanged(user) {
+    if (user) {
+      this.setState({
+        user: user,
+        authLoaded: true
+      });
+    } else {
+      this.setState({
+        user: null,
+        authLoaded: true
+      });
+    }
   }
 
   handleImageChange(e) {
@@ -36,7 +57,7 @@ class App extends Component {
       size: file.size
     };
     const imageRef = firebase.storage().ref().child('images/' + file.name)
-    imageRef.put(file, metadata).then(function(snapshot) {
+    imageRef.put(file, metadata).then(function (snapshot) {
       console.log('uploaded file!');
     });
   }
@@ -59,7 +80,8 @@ class App extends Component {
         dotIndex: dotIndex,
         label: label,
         x: dotCoordinates[dotIndex].x,
-        y: dotCoordinates[dotIndex].y
+        y: dotCoordinates[dotIndex].y,
+        date: new Date()
       });
   }
 
@@ -75,41 +97,26 @@ class App extends Component {
   render() {
     return (
       <div>
-        <Navbar inverse>
-          <Navbar.Header>
-            <Navbar.Brand>
-              CCWJ Image Annotation
-            </Navbar.Brand>
-            <Navbar.Toggle />
-          </Navbar.Header>
-        </Navbar>
-        <Row>
-          <Col md={9} className="text-center">
-            {this.state.imageUrl?
-              <ImageCanvas
-                imageUrl={this.state.imageUrl}
-                dotIndex={this.state.dotIndex}
-                setCanvasDimensions={(width, height) => this.setCanvasDimensions(width, height)} /> :
-              <h3>
-                Welcome to the CCWJ Image Annotation application! Please upload an image to begin.
-              </h3>
-            }
-          </Col>
-          <Col md={3}>
-            <Row>
-              <input
-                style={{marginTop: '25px'}}
-                type="file"
-                accept="image/*"
-                onChange={e => this.handleImageChange(e)}
-                className={this.state.imageUrl ? "hidden" : ""} />
-              {this.state.imageUrl ?
-                <Annotator
-                  dotIndex={this.state.dotIndex}
-                  labelRegion={(dotIndex, label) => this.labelRegion(dotIndex, label)} /> : ""}
-            </Row>
-          </Col>
-        </Row>
+        {!this.state.authLoaded &&
+          <Dimmer active>
+            <Loader />
+          </Dimmer>
+        }
+        <NavBar user={this.state.user} />
+        {this.state.authLoaded && !this.state.user && <Welcome />}
+        {this.state.user && !this.state.imageUrl && 
+          <Uploader
+            handleImageChange={(e) => this.handleImageChange(e)}
+          />
+        }
+        {this.state.user && this.state.imageUrl &&
+          <Annotator
+            imageUrl={this.state.imageUrl}
+            dotIndex={this.state.dotIndex}
+            setCanvasDimensions={(width, height) => this.setCanvasDimensions(width, height)}
+            labelRegion={(dotIndex, label) => this.labelRegion(dotIndex, label)}
+          />
+        }
       </div>
     );
   }

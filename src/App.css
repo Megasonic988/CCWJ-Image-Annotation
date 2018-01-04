@@ -27,19 +27,22 @@
   to { transform: rotate(360deg); }
 }
 
-.outline {
-  border: 2px dotted red;
-}
-
 canvas {
   width: 100%;
 }
 
-.row {
-  padding-left: 20px;
-  padding-right: 20px;
+.ui.menu {
+  border-radius: 0;
 }
 
-.btn {
-  margin-bottom: 5px;
+.ui.menu .item:before {
+  width: 0px;
+}
+
+.ui.text.container {
+  max-width: 100% !important;
+}
+
+.hidden {
+  display: none;
 }
