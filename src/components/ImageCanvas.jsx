@@ -61,7 +61,13 @@ class ImageCanvas extends Component {
     dotCoordinates.forEach((c, index) => {
       ctx.beginPath();
       ctx.arc(c.x, c.y, radius, 0, 2 * Math.PI, false);
-      ctx.fillStyle = index === dotIndex ? "red" : "white";
+      if (index < dotIndex) {
+        ctx.fillStyle = 'green';
+      } else if (index === dotIndex) {
+        ctx.fillStyle = 'red';
+      } else {
+        ctx.fillStyle = 'white'
+      }
       ctx.fill();
       ctx.lineWidth = 0.5;
       ctx.strokeStyle = "black";

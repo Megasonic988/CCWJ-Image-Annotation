@@ -19,13 +19,13 @@ class UserLogin extends Component {
         <div>
           <Image style={{'marginBottom': '0'}} shape='circular' size="mini" src={this.props.user.photoURL} floated="left" />
           <strong style={{'paddingRight': '10px'}}>Hello, {this.props.user.displayName.split(' ')[0]}</strong>
-          <Button color="red" onClick={() => this.signOut()}>Log Out</Button>
+          <Button basic color="red" onClick={() => this.signOut()}>Log Out</Button>
         </div>
       );
     } else {
       return (
         <div>
-          <Button primary onClick={() => this.signIn()}>Sign In</Button>
+          <Button basic primary onClick={() => this.signIn()}>Sign In</Button>
         </div>
       );
     }

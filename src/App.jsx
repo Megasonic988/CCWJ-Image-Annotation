@@ -82,9 +82,11 @@ class App extends Component {
   }
 
   backDotIndex() {
-    this.setState({
-      dotIndex: this.state.dotIndex - 1
-    });
+    if (this.state.dotIndex > 0) {
+      this.setState({
+        dotIndex: this.state.dotIndex - 1
+      });
+    }
   }
 
   setCanvasDimensions(width, height) {
