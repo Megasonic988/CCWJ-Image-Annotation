@@ -1,5 +1,5 @@
-const HORIZONTAL_SPACING = 50;
-const VERTICAL_SPACING = 50;
+const HORIZONTAL_SPACING = 200;
+const VERTICAL_SPACING = 200;
 
 export function getCoordinates(width, height) {
     const dotCoordinates = [];

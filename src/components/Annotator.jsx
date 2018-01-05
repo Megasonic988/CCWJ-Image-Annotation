@@ -1,8 +1,9 @@
 import React from 'react';
-import { Grid, Button, Icon } from 'semantic-ui-react'; 
+import { Grid, Button, Icon } from 'semantic-ui-react';
 
 import ImageCanvas from './ImageCanvas';
 import Labels from './Labels';
+import Downloader from './Downloader';
 
 const Annotator = (props) => (
   <Grid style={{padding: '40px'}}>
@@ -14,9 +15,14 @@ const Annotator = (props) => (
           setCanvasDimensions={(width, height) => props.setCanvasDimensions(width, height)} />
       </Grid.Column>
       <Grid.Column width={4}>
-        <Labels
-          dotIndex={props.dotIndex}
-          labelRegion={(dotIndex, label) => props.labelRegion(dotIndex, label)} />
+        {!props.annotationsComplete ? 
+          <Labels
+            dotIndex={props.dotIndex}
+            labelRegion={(dotIndex, label) => props.labelRegion(dotIndex, label)} /> :
+          <Downloader 
+            fileName={props.fileName} 
+            restart={() => props.restart()} />
+        }
         <Grid.Row style={{paddingTop: '50px'}}>
           <Button 
             color='red' 
@@ -24,7 +30,7 @@ const Annotator = (props) => (
             icon
             labelPosition='left'>
             <Icon name='left arrow' />
-            Back
+            Last Label
           </Button>
         </Grid.Row>
       </Grid.Column>

@@ -3,10 +3,6 @@ import * as GridCoordinates from '../helpers/GridCoordinates';
 
 class ImageCanvas extends Component {
 
-  componentDidMount() {
-    this.drawCanvas();
-  }
-
   componentDidUpdate() {
     this.clearCanvas();
     this.drawImage();
@@ -28,14 +24,6 @@ class ImageCanvas extends Component {
     const canvas = this.refs.canvas;
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
-
-  drawCanvas() {
-    const canvas = this.refs.canvas;
-    const ctx = canvas.getContext("2d");
-    ctx.rect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "white";
-    ctx.fill();
   }
 
   calculateCanvasHeight(canvasWidth, imageWidth, imageHeight) {

@@ -21,6 +21,7 @@ class App extends Component {
         width: null,
         height: null
       },
+      annotationsComplete: false,
       user: null,
       authLoaded: false
     };
@@ -64,9 +65,6 @@ class App extends Component {
   }
 
   labelRegion(dotIndex, label) {
-    this.setState({
-      dotIndex: dotIndex + 1
-    });
     const dotCoordinates = GridCoordinates.getCoordinates(this.state.canvas.width, this.state.canvas.height);
     const id = this.state.file.name.replace(/[^a-zA-Z0-9]/g, '');
     firebase
@@ -79,12 +77,17 @@ class App extends Component {
         y: dotCoordinates[dotIndex].y,
         date: new Date().toISOString()
       });
+    this.setState({
+      dotIndex: dotIndex + 1,
+      annotationsComplete: (dotIndex + 1) >= dotCoordinates.length
+    });
   }
 
   backDotIndex() {
     if (this.state.dotIndex > 0) {
       this.setState({
-        dotIndex: this.state.dotIndex - 1
+        dotIndex: this.state.dotIndex - 1,
+        annotationsComplete: false
       });
     }
   }
@@ -95,6 +98,19 @@ class App extends Component {
         width: width,
         height: height
       }
+    });
+  }
+
+  restart() {
+    this.setState({
+      imageUrl: null,
+      file: null,
+      dotIndex: 0,
+      canvas: {
+        width: null,
+        height: null
+      },
+      annotationsComplete: false
     });
   }
 
@@ -116,10 +132,13 @@ class App extends Component {
         {this.state.user && this.state.imageUrl &&
           <Annotator
             imageUrl={this.state.imageUrl}
+            fileName={this.state.file.name}
             dotIndex={this.state.dotIndex}
             setCanvasDimensions={(width, height) => this.setCanvasDimensions(width, height)}
             labelRegion={(dotIndex, label) => this.labelRegion(dotIndex, label)}
             backDotIndex={() => this.backDotIndex()}
+            annotationsComplete={this.state.annotationsComplete}
+            restart={() => this.restart()}
           />
         }
       </div>
