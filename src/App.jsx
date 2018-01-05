@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import { Dimmer, Loader } from 'semantic-ui-react';
 import * as firebase from 'firebase';
+import * as GridCoordinates from './helpers/GridCoordinates';
 
 import Annotator from './components/Annotator';
 import NavBar from './components/NavBar';
@@ -66,23 +67,24 @@ class App extends Component {
     this.setState({
       dotIndex: dotIndex + 1
     });
-    const dotCoordinates = [];
-    for (let y = 10; y < this.state.canvas.height; y = y + 20) {
-      for (let x = 10; x < this.state.canvas.width; x = x + 20) {
-        dotCoordinates.push({ x: x, y: y });
-      }
-    }
+    const dotCoordinates = GridCoordinates.getCoordinates(this.state.canvas.width, this.state.canvas.height);
+    const id = this.state.file.name.replace(/[^a-zA-Z0-9]/g, '');
     firebase
       .database()
-      .ref('annotations/')
-      .push({
+      .ref('annotations/' + id + '/' + dotIndex)
+      .set({
         name: this.state.file.name,
-        dotIndex: dotIndex,
         label: label,
         x: dotCoordinates[dotIndex].x,
         y: dotCoordinates[dotIndex].y,
-        date: new Date()
+        date: new Date().toISOString()
       });
+  }
+
+  backDotIndex() {
+    this.setState({
+      dotIndex: this.state.dotIndex - 1
+    });
   }
 
   setCanvasDimensions(width, height) {
@@ -115,6 +117,7 @@ class App extends Component {
             dotIndex={this.state.dotIndex}
             setCanvasDimensions={(width, height) => this.setCanvasDimensions(width, height)}
             labelRegion={(dotIndex, label) => this.labelRegion(dotIndex, label)}
+            backDotIndex={() => this.backDotIndex()}
           />
         }
       </div>

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import * as GridCoordinates from '../helpers/GridCoordinates';
 
 class ImageCanvas extends Component {
 
@@ -56,12 +57,7 @@ class ImageCanvas extends Component {
     const ctx = canvas.getContext("2d");
     const radius = 2;
     const { dotIndex } = this.props;
-    const dotCoordinates = [];
-    for (let y = 10; y < canvas.height; y = y + 20) {
-      for (let x = 10; x < canvas.width; x = x + 20) {
-        dotCoordinates.push({ x: x, y: y });
-      }
-    }
+    const dotCoordinates = GridCoordinates.getCoordinates(canvas.width, canvas.height);
     dotCoordinates.forEach((c, index) => {
       ctx.beginPath();
       ctx.arc(c.x, c.y, radius, 0, 2 * Math.PI, false);
