@@ -33,8 +33,10 @@ class ImageCanvas extends Component {
   drawImage() {
     const canvas = this.refs.canvas;
     const image = this.refs.image;
-    canvas.width = canvas.offsetWidth;
-    canvas.height = this.calculateCanvasHeight(canvas.offsetWidth, image.width, image.height);
+    canvas.width = image.width;
+    canvas.height = image.height;
+    // canvas.width = canvas.offsetWidth;
+    // canvas.height = this.calculateCanvasHeight(canvas.offsetWidth, image.width, image.height);
     const ctx = canvas.getContext("2d");
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
     this.props.setCanvasDimensions(canvas.width, canvas.height);
