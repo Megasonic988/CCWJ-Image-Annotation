@@ -85,7 +85,7 @@ class ImageCanvas extends Component {
       );
     }
     return (
-      <div>
+      <div style={{overflow: 'scroll'}}>
         <canvas ref="canvas" />
         {image}
       </div>

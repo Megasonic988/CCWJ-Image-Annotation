@@ -27,10 +27,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* canvas {
-  width: 100%;
-} */
-
 .ui.menu {
   border-radius: 0;
 }
