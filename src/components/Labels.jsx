@@ -8,7 +8,8 @@ const labels = [
   "FS (A) - Ferrite and Second Phases Aligned",
   "FS (I) - Ferrite and Second Phases Intragranular",
   "AF - Acicular Ferrite",
-  "M - Martensite"
+  "M - Martensite",
+  "Undefined"
 ];
 
 class Labels extends Component {
