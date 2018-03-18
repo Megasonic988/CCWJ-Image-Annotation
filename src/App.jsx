@@ -21,9 +21,14 @@ class App extends Component {
         width: null,
         height: null
       },
+      region: {
+        point1: null,
+        point2: null
+      },
       annotationsComplete: false,
       user: null,
-      authLoaded: false
+      authLoaded: false,
+      labelledPoints: []
     };
     this.auth = firebase.auth();
     this.auth.onAuthStateChanged(this.onAuthStateChanged.bind(this));
@@ -62,25 +67,82 @@ class App extends Component {
     imageRef.put(file, metadata).then(function (snapshot) {
       console.log('uploaded file!');
     });
+
+    // Get already labelled points from Firebase
+    const id = file.name.replace(/[^a-zA-Z0-9]/g, '');
+    firebase
+      .database()
+      .ref('annotations/' + id)
+      .once('value', snapshot => {
+        if (!snapshot.val()) return;
+        const indexes = Object.keys(snapshot.val());
+        const maxIndex = indexes[indexes.length - 1];
+        const loadedLabelledPoints = []
+        for (let i = 0; i < maxIndex; i++) {
+          if (snapshot.val()[i]) {
+            loadedLabelledPoints.push(snapshot.val()[i]);
+          } else {
+            loadedLabelledPoints.push(null);
+          }
+        }
+        this.setState({
+          labelledPoints: loadedLabelledPoints
+        });
+      });
   }
 
-  labelRegion(dotIndex, label) {
+  labelPoint(dotIndex, label) {
+    if (this.state.region.point1 && this.state.region.point2) return;
     const dotCoordinates = GridCoordinates.getCoordinates(this.state.canvas.width, this.state.canvas.height);
     const id = this.state.file.name.replace(/[^a-zA-Z0-9]/g, '');
+    const point = {
+      name: this.state.file.name,
+      label: label,
+      x: dotCoordinates[dotIndex].x,
+      y: dotCoordinates[dotIndex].y,
+      dotIndex: dotIndex,
+      date: new Date().toISOString()
+    };
     firebase
       .database()
       .ref('annotations/' + id + '/' + dotIndex)
-      .set({
-        name: this.state.file.name,
-        label: label,
-        x: dotCoordinates[dotIndex].x,
-        y: dotCoordinates[dotIndex].y,
-        date: new Date().toISOString()
-      });
+      .set(point);
+    const labelledPointsCopy = this.state.labelledPoints.slice();
+    labelledPointsCopy[dotIndex] = point;
     this.setState({
       dotIndex: dotIndex + 1,
-      annotationsComplete: (dotIndex + 1) >= dotCoordinates.length
+      annotationsComplete: (dotIndex + 1) >= dotCoordinates.length,
+      labelledPoints: labelledPointsCopy
     });
+  }
+
+  labelRegion(label) {
+    if (this.state.region.point1 && this.state.region.point2) {
+      const dotCoordinates = GridCoordinates.getCoordinatesInRegion(
+        this.state.canvas.width, this.state.canvas.height,
+        this.state.region.point1, this.state.region.point2);
+      const id = this.state.file.name.replace(/[^a-zA-Z0-9]/g, '');
+      const labelledPointsCopy = this.state.labelledPoints.slice();
+      dotCoordinates.forEach(c => {
+        const point = {
+          name: this.state.file.name,
+          label: label,
+          x: c.x,
+          y: c.y,
+          dotIndex: c.dotIndex,
+          date: new Date().toISOString()
+        };
+        firebase
+          .database()
+          .ref('annotations/' + id + '/' + c.dotIndex)
+          .set(point);
+        labelledPointsCopy[c.dotIndex] = point;
+      });
+      this.setState({
+        labelledPoints: labelledPointsCopy
+      });
+      this.setRegion(null, null);
+    }
   }
 
   backDotIndex() {
@@ -92,11 +154,28 @@ class App extends Component {
     }
   }
 
+  skipDotIndex() {
+    const dotCoordinates = GridCoordinates.getCoordinates(this.state.canvas.width, this.state.canvas.height);
+    this.setState({
+      dotIndex: this.state.dotIndex + 1,
+      annotationsComplete: (this.state.dotIndex + 1) >= dotCoordinates.length,
+    });
+  }
+
   setCanvasDimensions(width, height) {
     this.setState({
       canvas: {
         width: width,
         height: height
+      }
+    });
+  }
+
+  setRegion(regionPoint1, regionPoint2) {
+    this.setState({
+      region: {
+        point1: regionPoint1,
+        point2: regionPoint2
       }
     });
   }
@@ -124,7 +203,7 @@ class App extends Component {
         }
         <NavBar user={this.state.user} />
         {this.state.authLoaded && !this.state.user && <Welcome />}
-        {this.state.user && !this.state.imageUrl && 
+        {this.state.user && !this.state.imageUrl &&
           <Uploader
             handleImageChange={(e) => this.handleImageChange(e)}
           />
@@ -134,10 +213,16 @@ class App extends Component {
             imageUrl={this.state.imageUrl}
             fileName={this.state.file.name}
             dotIndex={this.state.dotIndex}
+            labelledPoints={this.state.labelledPoints}
             setCanvasDimensions={(width, height) => this.setCanvasDimensions(width, height)}
-            labelRegion={(dotIndex, label) => this.labelRegion(dotIndex, label)}
+            canvasDimensions={this.state.canvas}
+            labelPoint={(dotIndex, label) => this.labelPoint(dotIndex, label)}
+            labelRegion={(label) => this.labelRegion(label)}
+            region={this.state.region}
             backDotIndex={() => this.backDotIndex()}
+            skipDotIndex={() => this.skipDotIndex()}
             annotationsComplete={this.state.annotationsComplete}
+            setRegion={(point1, point2) => this.setRegion(point1, point2)}
             restart={() => this.restart()}
           />
         }

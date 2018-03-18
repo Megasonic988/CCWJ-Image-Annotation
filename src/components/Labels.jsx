@@ -1,15 +1,17 @@
 import React, { Component } from 'react';
 import { Grid, Button } from 'semantic-ui-react';
+import * as GridCoordinates from '../helpers/GridCoordinates';
 
 const labels = [
   "PF - Primary Ferrite",
-  "PF (I) - Primary Ferrite Intragranular",
+  "PF(I) - Primary Ferrite Intragranular",
   "P - Pearlite",
-  "FS (A) - Ferrite and Second Phases Aligned",
-  "FS (I) - Ferrite and Second Phases Intragranular",
+  "FS - Ferrite and Second Phases",
+  // "FS (A) - Ferrite and Second Phases Aligned",
+  // "FS (I) - Ferrite and Second Phases Intragranular",
   "AF - Acicular Ferrite",
   "M - Martensite",
-  "Undefined"
+  "U - Undefined"
 ];
 
 class Labels extends Component {
@@ -34,15 +36,32 @@ class Labels extends Component {
     const labelIndex = event.keyCode - startingKeyCode;
     if (labelIndex >= 0 && labelIndex < this.state.labels.length) {
       const label = this.state.labels[labelIndex];
-      this.props.labelRegion(this.props.dotIndex, label);
+      this.label(this.props.dotIndex, label);
     }
+  }
+
+  label(dotIndex, label) {
+    this.props.labelPoint(dotIndex, label);
+    this.props.labelRegion(label);
   }
 
   render() {
     const { labels } = this.state;
     return (
       <div style={{paddingTop: '100px'}}>
-        <p><strong>You are labelling region {this.props.dotIndex + 1}.</strong></p>
+        <p>Image {this.props.fileName}</p>
+        <p><strong>You are labelling point {this.props.dotIndex + 1}.</strong></p>
+        {this.props.region.point1 && this.props.region.point2 &&
+          <p>You have selected a region with
+            <strong>
+              {' '}{GridCoordinates.getCoordinatesInRegion(
+                this.props.canvasDimensions.width, this.props.canvasDimensions.height,
+                this.props.region.point1, this.props.region.point2
+              ).length}{' '}
+            </strong> 
+            points. Please label this region or click again to discard the region.
+          </p>
+        }
         <p>Please select the label:</p>
         <Grid style={{padding: '10px'}}>
           {labels.map((label, index) => (
@@ -50,7 +69,7 @@ class Labels extends Component {
               <Button
                 fluid
                 color='brown'
-                onClick={() => this.props.labelRegion(this.props.dotIndex, label)}>
+                onClick={() => this.label(this.props.dotIndex, label)}>
                 {'(' + (index + 1) + ') ' + label}
               </Button>
             </Grid.Row>
